@@ -4,7 +4,7 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
 
 # Cargar los datos
 precios_2021 = pd.read_excel('PRECIOS 2021.xlsx', engine='openpyxl')
@@ -79,9 +79,9 @@ if st.sidebar.checkbox("Mostrar Predicción de Precios"):
     # Realizar predicciones
     y_pred = modelo.predict(X_test)
     
-    # Mostrar el desempeño del modelo
-    error = mean_squared_error(y_test, y_pred)
-    st.write(f"Error cuadrático medio (MSE) del modelo: {error}")
+    # Mostrar el desempeño del modelo usando MAE
+    error_mae = mean_absolute_error(y_test, y_pred)
+    st.write(f"Error absoluto medio (MAE) del modelo: {error_mae}")
     
     # Visualizar las predicciones
     plt.figure(figsize=(10, 6))
