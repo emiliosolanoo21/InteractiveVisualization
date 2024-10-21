@@ -55,28 +55,39 @@ precios_seleccionado = precios_seleccionado[(precios_seleccionado['FECHA'] >= ra
 consumo_seleccionado = consumo_seleccionado[(consumo_seleccionado['Fecha'] >= rango_fechas[0]) & (consumo_seleccionado['Fecha'] <= rango_fechas[1])]
 importacion_seleccionado = importacion_seleccionado[(importacion_seleccionado['Fecha'] >= rango_fechas[0]) & (importacion_seleccionado['Fecha'] <= rango_fechas[1])]
 
-# Gráficos interactivos con paleta de colores
+# **Gráficos enlazados**: Agregar un selector de tipo de combustible
+combustible_seleccionado = st.sidebar.selectbox("Seleccione el tipo de combustible", ["Gasolina regular", "Gasolina superior", "Diesel bajo azufre", "Gas licuado de petróleo"])
+typesCombustibles = {
+    "Gasolina regular": "Regular",
+    "Gasolina superior": "Superior",
+    "Diesel bajo azufre": "Diesel",
+    "Gas licuado de petróleo": "Glp Cilindro 25Lbs."   
+}
+
+
+# Gráfico de precios (general, no enlazado)
 if visualizacion == "Precios":
     st.subheader("Evolución de Precios de Combustibles")
     fig = px.line(precios_seleccionado, x='FECHA', y=['Superior', 'Regular', 'Diesel', 'Glp Cilindro 25Lbs.'],
                   title="Precios de Combustibles a lo Largo del Tiempo", 
-                  color_discrete_sequence=['#1f77b4'])  # Azul Honolulu para estabilidad y confianza en precios
+                  color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])  # Colores de Tableau   
     fig.update_layout(xaxis_title="Fecha", yaxis_title="Precio (Q)")
     st.plotly_chart(fig)
-    
-elif visualizacion == "Consumo":
-    st.subheader("Consumo de Combustibles")
-    fig = px.line(consumo_seleccionado, x='Fecha', y=['Gasolina regular', 'Gasolina superior', 'Diesel bajo azufre', 'Gas licuado de petróleo'],
-                  title="Consumo de Combustibles a lo Largo del Tiempo", 
-                  color_discrete_sequence=['#2ca02c'])  # Pigmento Verde para sostenibilidad en consumo
+
+# Gráficos de consumo e importación, enlazados con el combustible seleccionado
+if visualizacion == "Consumo":
+    st.subheader(f"Consumo de {combustible_seleccionado}")
+    fig = px.line(consumo_seleccionado, x='Fecha', y=combustible_seleccionado,
+                  title=f"Consumo de {combustible_seleccionado} a lo Largo del Tiempo", 
+                  color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])  # Colores de Tableau
     fig.update_layout(xaxis_title="Fecha", yaxis_title="Consumo (m³)")
     st.plotly_chart(fig)
 
 elif visualizacion == "Importación":
-    st.subheader("Importación de Combustibles")
-    fig = px.line(importacion_seleccionado, x='Fecha', y=['Gasolina regular', 'Gasolina superior', 'Diesel bajo azufre', 'Gas licuado de petróleo'],
-                  title="Importación de Combustibles a lo Largo del Tiempo", 
-                  color_discrete_sequence=['#ff7f0e'])  # Naranja para energía y dinamismo en importaciones
+    st.subheader(f"Importación de {combustible_seleccionado}")
+    fig = px.line(importacion_seleccionado, x='Fecha', y=combustible_seleccionado,
+                  title=f"Importación de {combustible_seleccionado} a lo Largo del Tiempo", 
+                  color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])  # Naranja para energía y dinamismo en importaciones
     fig.update_layout(xaxis_title="Fecha", yaxis_title="Volumen Importado (m³)")
     st.plotly_chart(fig)
 
@@ -88,7 +99,7 @@ if st.sidebar.checkbox("Mostrar Predicción de Precios"):
     # Definir datos para el modelo
     precios_seleccionado['FECHA_ordinal'] = precios_seleccionado['FECHA'].map(pd.Timestamp.toordinal)
     X = precios_seleccionado[['FECHA_ordinal']]
-    y = precios_seleccionado['Regular']  # Precio de gasolina regular como ejemplo
+    y = precios_seleccionado[typesCombustibles[combustible_seleccionado]]
     
     # Separar datos de entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
