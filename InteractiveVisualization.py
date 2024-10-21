@@ -213,10 +213,28 @@ if st.sidebar.checkbox("Mostrar Predicción de Precios"):
     error_rmse_rf = error_mse_rf ** 0.5
     r2_rf = modelo_rf.score(X_test, y_test)
 
-    # Mostrar el desempeño de los tres modelos
-    st.write(f"**Error absoluto medio (MAE) de Regresión Lineal**: {error_mae_lr:.2f}")
-    st.write(f"**Error absoluto medio (MAE) de Árbol de Decisión**: {error_mae_tree:.2f}")
-    st.write(f"**Error absoluto medio (MAE) de Random Forest**: {error_mae_rf:.2f}")
+   # Mostrar resultados de los modelos
+    st.write("**Error absoluto medio (MAE) de los Modelos:**")
+    st.write(f"Regresión Lineal: {error_mae_lr:.4f}")
+    st.write(f"Árbol de Decisión: {error_mae_tree:.4f}")
+    st.write(f"Random Forest: {error_mae_rf:.4f}")
+
+    # Visualizar predicciones del mejor modelo
+    mejor_modelo = min([(modelo_lr, y_pred_lr, error_mae_lr),
+                        (modelo_tree, y_pred_tree, error_mae_tree),
+                        (modelo_rf, y_pred_rf, error_mae_rf)],
+                       key=lambda x: x[2])[0]
+
+    # Predecir valores para todo el conjunto de datos
+    precios_seleccionado['Prediccion'] = mejor_modelo.predict(precios_seleccionado[['FECHA_ordinal']])
+
+    # Graficar las predicciones junto a los valores reales
+    fig_pred = px.line(precios_seleccionado, x='FECHA', y=[typesCombustibles[combustible_seleccionado], 'Prediccion'],
+                       title=f"Predicción de {combustible_seleccionado} vs Valores Reales",
+                       labels={'value': 'Precio (Q)', 'FECHA': 'Fecha'},
+                       color_discrete_sequence=['#1f77b4', '#ff7f0e'])
+    fig_pred.update_layout(xaxis_title="Fecha", yaxis_title="Precio (Q)")
+    st.plotly_chart(fig_pred)
 
     # Tabla comparativa detallada
     comparacion_modelos = pd.DataFrame({
