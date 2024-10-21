@@ -39,6 +39,22 @@ st.title("Dashboard Interactivo de Combustibles")
 st.sidebar.title("Opciones de Visualización")
 visualizacion = st.sidebar.selectbox("Seleccione qué visualizar", ["Precios", "Consumo", "Importación"])
 
+# Agregar selección de rango de fechas
+st.sidebar.title("Filtrar por rango de fechas")
+min_fecha = precios['FECHA'].min().date()  # Convertir a date
+max_fecha = precios['FECHA'].max().date()  # Convertir a date
+
+# Agregar el slider para la selección de fechas
+rango_fechas = st.sidebar.slider("Seleccione el rango de fechas", min_value=min_fecha, max_value=max_fecha, value=(min_fecha, max_fecha))
+
+# Convertir las fechas seleccionadas a Timestamps para poder filtrar
+rango_fechas = pd.to_datetime(rango_fechas)
+
+# Filtrar los datos con el rango de fechas seleccionado
+precios_seleccionado = precios_seleccionado[(precios_seleccionado['FECHA'] >= rango_fechas[0]) & (precios_seleccionado['FECHA'] <= rango_fechas[1])]
+consumo_seleccionado = consumo_seleccionado[(consumo_seleccionado['Fecha'] >= rango_fechas[0]) & (consumo_seleccionado['Fecha'] <= rango_fechas[1])]
+importacion_seleccionado = importacion_seleccionado[(importacion_seleccionado['Fecha'] >= rango_fechas[0]) & (importacion_seleccionado['Fecha'] <= rango_fechas[1])]
+
 # Gráficos interactivos con paleta de colores
 if visualizacion == "Precios":
     st.subheader("Evolución de Precios de Combustibles")
